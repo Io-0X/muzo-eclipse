@@ -1,16 +1,14 @@
-```gitignore
 # Dependencies
 node_modules/
 
 # Logs and temp files
 *.log
 *.tmp
-*.swp
 
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
 # Editors
 .vscode/
@@ -21,23 +19,24 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.Python
+venv/
+.venv/
+.env
+.ENV
 
-# Build artifacts
+# Build outputs
 dist/
 build/
-*.o
-*.obj
+target/
+*.out
+*.exe
+*.dll
 *.so
 *.a
-*.dll
-*.exe
+*.obj
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Compressed files
+# Compression files
 *.zip
 *.gz
 *.tar
@@ -61,13 +60,452 @@ htmlcov/
 *.tar.xz
 *.tar.zst
 
-# System files
-.DS_Store
-Thumbs.db
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
 
 # Cache directories
 .mypy_cache/
 .pytest_cache/
 .gradle/
+.cargo/
+.npm/
+.yarn/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# IDE specific
+.vs/
+.vim/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Compiled files
+*.class
+*.o
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.obj
+*.jar
+*.war
+*.ear
+*.bin
+
+# Generated files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+.junit/
+.test-results/
+
+# Documentation
+doc/api/
+
+# Distribution / packaging
+.Python
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+
+# Translations
+*.mo
+*.pot
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask
+instance/
+.webassets-cache
+
+# Scrapy
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
 target/
-```
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# IDE
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/recommendations.json
+.idea/*
+!.idea/libraries/*
+!.idea/modules.xml
+!.idea/gradle.xml
+!.idea/dictionaries
+!.idea/vcs.xml
+!.idea/jsLibraryMappings.xml
+
+# Build system
+cmake-build-*/
+_build/
+buck-out/
+build/
+dist/
+output/
+out/
+
+# Executables
+*.exe
+*.out
+*.app
+*.bin
+*.dll
+*.so
+*.dylib
+*.class
+*.o
+*.obj
+*.a
+*.lib
+*.jar
+*.war
+*.par
+*.scc
+*.swf
+*.swc
+*.pdb
+*.ilk
+*.map
+*.exp
+*.idb
+*.ncb
+*.sdf
+*.opendb
+*.opensdf
+*.user
+*.userosscache
+*.suo
+*.tmp
+*.temp
+*.bak
+*.cache
+*.autosave
+*.autosave.*
+*.un~
+*~
+
+# Compressed
+*.7z
+*.arj
+*.bz2
+*.cab
+*.deb
+*.dmg
+*.gz
+*.iso
+*.lzh
+*.msi
+*.pkg
+*.rar
+*.rpm
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tbz2
+*.tgz
+*.txz
+*.zip
+*.z
+*.Z
+*.zipx
+*.lz4
+*.lzh
+*.zst
+*.lz
+*.lzo
+*.tar.Z
+*.tar.lz4
+*.tar.lzh
+*.tar.zst
+*.tar.lz
+*.tar.lzo
+
+# Configuration
+config/*.key
+config/*.pem
+config/*.crt
+config/*.cert
+config/*.jks
+config/*.keystore
+config/*.truststore
+config/*.p12
+config/*.pfx
+config/*.p7b
+config/*.p7c
+config/*.spc
+config/*.pvk
+config/*.sst
+config/*.stl
+config/*.cer
+config/*.der
+config/*.p7s
+config/*.p8
+config/*.p10
+config/*.csr
+config/*.crl
+config/*.pem.enc
+config/*.key.enc
+config/*.secret
+config/*.token
+config/*.password
+config/*.passwd
+config/*.pwd
+config/*.htpasswd
+config/*.env
+config/*.env.*
+config/*.ini
+config/*.conf
+config/*.cfg
+config/*.yml
+config/*.yaml
+config/*.json
+config/*.xml
+config/*.properties
+config/*.props
+config/*.inf
+config/*.reg
+config/*.url
+config/*.lnk
+config/*.bat
+config/*.cmd
+config/*.ps1
+config/*.sh
+config/*.bash
+config/*.zsh
+config/*.fish
+config/*.rb
+config/*.pl
+config/*.py
+config/*.php
+config/*.js
+config/*.ts
+config/*.coffee
+config/*.sql
+config/*.sqlite
+config/*.mdb
+config/*.accdb
+config/*.db
+config/*.db3
+config/*.sqlite3
+config/*.fdb
+config/*.gdb
+config/*.ib
+config/*.fbd
+config/*.fdb
+config/*.gdb
+config/*.ib
+config/*.fbd
+config/*.fdb
+config/*.gdb
+config/*.ib
+config/*.fbd
+
+# Log files
+*.log
+**/logs
+*.trace
+*.trc
+*.syslog
+*.out
+*.err
+*.error
+*.dump
+*.dmp
+*.stackdump
+*.core
+*.crash
+*.exception
+*.failure
+*.fault
+*.panic
+*.abort
+*.segv
+*.sig
+*.signal
+*.trap
+*.exit
+*.exited
+*.terminated
+*.killed
+*.stopped
+*.paused
+*.suspended
+*.resumed
+*.restarted
+*.shutdown
+*.halted
+*.crashed
+*.failed
+*.aborted
+*.timedout
+*.timeout
+*.hung
+*.frozen
+*.locked
+*.deadlock
+*.race
+*.mutex
+*.semaphore
+*.lock
+*.lck
+*.pid
+*.sock
+*.socket
+*.pipe
+*.fifo
+*.queue
+*.channel
+*.stream
+*.buffer
+*.cache
+*.temp
+*.tmp
+*.tmp.*
+*.temp.*
+*.bak
+*.backup
+*.save
+*.sav
+*.~*
+*~
+*.swp
+*.swo
+*.swn
+*.swm
+*.swl
+*.swx
+*.un~
+*.orig
+*.rej
+*.merge
+*.conflict
+*.conflicted
+*.mine
+*.theirs
+*.base
+*.remote
+*.local
+*.working
+*.index
+*.lock
+*.lck
+*.lock-wscript
+*.~lock.*
+*.swp
+*.swo
+*.swn
+*.swm
+*.swl
+*.swx
+*.un~
+*.orig
+*.rej
+*.merge
+*.conflict
+*.conflicted
+*.mine
+*.theirs
+*.base
+*.remote
+*.local
+*.working
+*.index
+*.lock
+*.lck
+*.lock-wscript
+*.~lock.*
