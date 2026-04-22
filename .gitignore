@@ -2,7 +2,7 @@
 # Dependencies
 node_modules/
 
-# Environment variables
+# Environment
 .env
 .env.local
 *.env.*
@@ -10,39 +10,27 @@ node_modules/
 # Logs
 *.log
 
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# Build outputs
+# Build artifacts
 dist/
 build/
 target/
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
 
 # Temporary files
 *.tmp
 *.swp
 *.swo
 
+# Cache
+.cache/
+.node_modules/
+.npm/
+.yarn/
+
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# IDE specific
+# Editors
 .vscode/
 .idea/
-
-# Testing
-.mypy_cache/
-.pytest_cache/
-
-# Package manager
-package-lock.json
 ```

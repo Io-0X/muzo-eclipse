@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 
 const router = new Hono();
-import { getSimilarTracks, LASTFM_API_KEY } from '../lib/lastfm_api.js';
 import { getYouTubeSong } from '../lib/get_youtube_song.js';
 import youtubeiClient from '../lib/youtubei-client.js';
 import axios from 'axios';
@@ -748,79 +747,6 @@ router.get('/search/suggestions/debug', async (c) => {
       error: `Debug failed: ${error.message}`,
       query: c.req.query().q
     });
-  }
-});
-
-/**
- * @swagger
- * /api/similar:
- *   get:
- *     summary: Get similar songs based on Last.fm and YouTube
- *     parameters:
- *       - in: query
- *         name: title
- *         required: true
- *         schema:
- *           type: string
- *         description: Song title
- *       - in: query
- *         name: artist
- *         required: true
- *         schema:
- *           type: string
- *         description: Artist name
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 5
- *         description: Number of similar tracks to return
- *     responses:
- *       200:
- *         description: List of similar songs from YouTube
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   title:
- *                     type: string
- *                   artist:
- *                     type: string
- *                   # Add other properties as needed based on getYouTubeSong output
- *       400:
- *         description: Missing title or artist parameter
- *       500:
- *         description: Internal server error
- */
-router.get('/similar', async (c) => {
-  try {
-    const { title, artist, limit } = c.req.query();
-    // Use embedded key if env var missing
-    const apiKey = process.env.LASTFM_API_KEY || LASTFM_API_KEY;
-
-    if (!title || !artist) {
-      return c.json({ error: 'Missing title or artist parameter' });
-    }
-
-    const lastFmData = await getSimilarTracks(String(title), String(artist), apiKey, String(limit || '5'));
-
-    if (lastFmData && lastFmData.error) {
-      return c.json({ error: lastFmData.error });
-    }
-
-    const youtubeSearchPromises = lastFmData.map(t => getYouTubeSong(`${t.title} ${t.artist}`));
-    const allYoutubeResults = await Promise.all(youtubeSearchPromises);
-    const matched = allYoutubeResults.filter(r => r && r.id);
-
-    return c.json(matched);
-  } catch (error) {
-    console.error('Error in /api/similar:', error);
-    return c.json({ error: 'Something went wrong' });
   }
 });
 
