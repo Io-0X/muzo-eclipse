@@ -2,10 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { serve } from '@hono/node-server';
-import swaggerUi from 'swagger-ui-hono';
 import swaggerJsdoc from 'swagger-jsdoc';
-import helmet from 'helmet';
-import morgan from 'morgan';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -26,7 +23,6 @@ const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use('*', logger());
-app.use('*', helmet());
 app.use('*', cors({
   origin: '*',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -75,11 +71,35 @@ const swaggerOptions = {
 
 const specs = swaggerJsdoc(swaggerOptions);
 
-// Serve Swagger UI
-app.use('/api-docs/*', swaggerUi({
-  url: '/api-docs/doc.json',
-  spec: specs
-}));
+// Serve Swagger UI - Custom HTML endpoint
+app.get('/api-docs', (c) => {
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    window.onload = function() {
+      SwaggerUIBundle({
+        url: '/api-docs/doc.json',
+        dom_id: '#swagger-ui',
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
+        layout: "BaseLayout"
+      });
+    };
+  </script>
+</body>
+</html>
+  `;
+  return c.html(html);
+});
 
 // Serve Swagger JSON spec
 app.get('/api-docs/doc.json', (c) => {
