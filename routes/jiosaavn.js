@@ -1,6 +1,6 @@
-const express = require('express');
-const JioSaavn = require('../lib/jiosaavn');
-const router = express.Router();
+import { Hono } from 'hono';
+import JioSaavn from '../lib/jiosaavn.js';
+const router = new Hono();
 
 const jiosaavn = new JioSaavn();
 
@@ -39,21 +39,21 @@ const jiosaavn = new JioSaavn();
  *       500:
  *         description: Internal server error
  */
-router.get('/jiosaavn/search', async (req, res) => {
+router.get('/jiosaavn/search', async (c) => {
   try {
-    const { title, artist, debug = 0 } = req.query;
+    const { title, artist, debug = 0 } = c.c.req.query()();
 
     if (!title || !artist) {
-      return res.status(400).json({ error: 'Missing title or artist parameters' });
+      return c.json({ error: 'Missing title or artist parameters' });
     }
 
     const debugMode = debug === '1';
     const result = await jiosaavn.search(title, artist, debugMode);
     
-    res.json(result);
+    return c.json(result);
   } catch (error) {
     console.error('JioSaavn search error:', error);
-    res.status(500).json({ error: `JioSaavn search failed: ${error.message}` });
+    return c.json({ error: `JioSaavn search failed: ${error.message}` });
   }
 });
 
@@ -90,22 +90,22 @@ router.get('/jiosaavn/search', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.get('/jiosaavn/search/all', async (req, res) => {
+router.get('/jiosaavn/search/all', async (c) => {
   try {
-    const { q: query, limit = 10, debug = 0 } = req.query;
+    const { q: query, limit = 10, debug = 0 } = c.c.req.query()();
 
     if (!query) {
-      return res.status(400).json({ error: "Missing query parameter 'q'" });
+      return c.json({ error: "Missing query parameter 'q'" });
     }
 
     const debugMode = debug === '1';
     const result = await jiosaavn.searchAll(query, parseInt(limit), debugMode);
     
-    res.json(result);
+    return c.json(result);
   } catch (error) {
     console.error('JioSaavn search all error:', error);
-    res.status(500).json({ error: `JioSaavn search all failed: ${error.message}` });
+    return c.json({ error: `JioSaavn search all failed: ${error.message}` });
   }
 });
 
-module.exports = router;
+export default router;

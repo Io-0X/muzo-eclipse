@@ -1,5 +1,5 @@
-const express = require('express');
-const router = express.Router();
+import { Hono } from 'hono';
+const router = new Hono();
 
 /**
  * @swagger
@@ -18,17 +18,17 @@ const router = express.Router();
  *       500:
  *         description: Charts data unavailable
  */
-router.get('/charts', async (req, res) => {
+router.get('/charts', async (c) => {
   try {
-    const { country } = req.query;
-    const ytmusic = req.app.locals.ytmusic;
+    const { country } = c.c.req.query()();
+    const ytmusic = c.get('ytmusic');
     
     const data = await ytmusic.getCharts(country);
-    res.json(data);
+    return c.json(data);
   } catch (error) {
     console.error('Charts error:', error);
     const errorMsg = error.message || 'Charts service temporarily unavailable';
-    res.status(500).json({
+    return c.json({
       error: `Charts data unavailable: ${errorMsg}`,
       message: 'YouTube Music charts are currently not accessible. This may be due to regional restrictions or service limitations.',
       fallback: 'Try using the search endpoint instead: /api/search?q=trending&filter=songs'
@@ -47,15 +47,15 @@ router.get('/charts', async (req, res) => {
  *       500:
  *         description: Mood categories unavailable
  */
-router.get('/moods', async (req, res) => {
+router.get('/moods', async (c) => {
   try {
-    const ytmusic = req.app.locals.ytmusic;
+    const ytmusic = c.get('ytmusic');
     const data = await ytmusic.getMoodCategories();
-    res.json(data);
+    return c.json(data);
   } catch (error) {
     console.error('Moods error:', error);
     const errorMsg = error.message || 'Mood categories service temporarily unavailable';
-    res.status(500).json({
+    return c.json({
       error: `Mood categories unavailable: ${errorMsg}`,
       message: 'YouTube Music mood categories are currently not accessible.',
       fallback: 'Try using the search endpoint instead: /api/search?q=relaxing&filter=playlists'
@@ -81,19 +81,19 @@ router.get('/moods', async (req, res) => {
  *       500:
  *         description: Mood playlists unavailable
  */
-router.get('/moods/:categoryId', async (req, res) => {
+router.get('/moods/:categoryId', async (c) => {
   try {
-    const { categoryId } = req.params;
-    const ytmusic = req.app.locals.ytmusic;
+    const { categoryId } = c.req.param();
+    const ytmusic = c.get('ytmusic');
     
     const data = await ytmusic.getMoodPlaylists(categoryId);
-    res.json(data);
+    return c.json(data);
   } catch (error) {
     console.error('Mood playlists error:', error);
     const errorMsg = error.message || 'Mood playlists service temporarily unavailable';
-    res.status(500).json({
+    return c.json({
       error: `Mood playlists unavailable: ${errorMsg}`,
-      message: `Mood playlists for category '${req.params.categoryId}' are currently not accessible.`,
+      message: `Mood playlists for category '${c.req.param().categoryId}' are currently not accessible.`,
       fallback: 'Try using the search endpoint instead: /api/search?q=mood&filter=playlists'
     });
   }
@@ -139,15 +139,15 @@ router.get('/moods/:categoryId', async (req, res) => {
  *       400:
  *         description: Missing params
  */
-router.get('/watch_playlist', async (req, res) => {
+router.get('/watch_playlist', async (c) => {
   try {
-    const { videoId, playlistId, radio = false, shuffle = false, limit = 25 } = req.query;
+    const { videoId, playlistId, radio = false, shuffle = false, limit = 25 } = c.c.req.query()();
     
     if (!videoId && !playlistId) {
-      return res.status(400).json({ error: 'Provide either videoId or playlistId' });
+      return c.json({ error: 'Provide either videoId or playlistId' });
     }
 
-    const ytmusic = req.app.locals.ytmusic;
+    const ytmusic = c.get('ytmusic');
     const data = await ytmusic.getWatchPlaylist(
       videoId, 
       playlistId, 
@@ -156,11 +156,11 @@ router.get('/watch_playlist', async (req, res) => {
       parseInt(limit)
     );
     
-    res.json(data);
+    return c.json(data);
   } catch (error) {
     console.error('Watch playlist error:', error);
-    res.status(500).json({ error: `Watch playlist unavailable: ${error.message}` });
+    return c.json({ error: `Watch playlist unavailable: ${error.message}` });
   }
 });
 
-module.exports = router;
+export default router;

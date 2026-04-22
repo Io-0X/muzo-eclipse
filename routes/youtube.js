@@ -1,6 +1,6 @@
-const express = require('express');
+import { Hono } from 'hono';
 
-const router = express.Router();
+const router = new Hono();
 
 const YT_FILTERS = new Set(['all', 'channels', 'playlists', 'videos']);
 
@@ -34,22 +34,22 @@ const YT_FILTERS = new Set(['all', 'channels', 'playlists', 'videos']);
  *       400:
  *         description: Missing/invalid params
  */
-router.get('/yt_search', async (req, res) => {
+router.get('/yt_search', async (c) => {
   try {
-    const { q: query, filter = 'all', continuationToken } = req.query;
+    const { q: query, filter = 'all', continuationToken } = c.c.req.query()();
 
     // FIXED: Allow continuation without query
     if (!query && !continuationToken) {
-      return res.status(400).json({ error: "Missing required query parameter 'q' or 'continuationToken'" });
+      return c.json({ error: "Missing required query parameter 'q' or 'continuationToken'" });
     }
 
     if (!YT_FILTERS.has(filter)) {
-      return res.status(400).json({
+      return c.json({
         error: `Invalid filter. Allowed: ${Array.from(YT_FILTERS).sort()}`
       });
     }
 
-    const youtubeSearch = req.app.locals.youtubeSearch;
+    const youtubeSearch = c.get('youtubeSearch');
     let results = [];
     let nextContinuationToken = null;
 
@@ -91,7 +91,7 @@ router.get('/yt_search', async (req, res) => {
     }
 
     // Include continuationToken at the end
-    res.json({
+    return c.json({
       filter,
       query: query || null,
       results,
@@ -99,7 +99,7 @@ router.get('/yt_search', async (req, res) => {
     });
   } catch (error) {
     console.error('YouTube search error:', error);
-    res.status(500).json({ error: `Search failed: ${error.message}` });
+    return c.json({ error: `Search failed: ${error.message}` });
   }
 });
 
@@ -121,25 +121,25 @@ router.get('/yt_search', async (req, res) => {
  *       400:
  *         description: Invalid channel ID
  */
-router.get('/yt_channel/:channelId', async (req, res) => {
+router.get('/yt_channel/:channelId', async (c) => {
   try {
-    const { channelId } = req.params;
-    const youtubeSearch = req.app.locals.youtubeSearch;
+    const { channelId } = c.req.param();
+    const youtubeSearch = c.get('youtubeSearch');
 
     // Get channel info using search
     const channelResults = await youtubeSearch.searchChannels(`channel:${channelId}`, null);
 
     if (channelResults.results.length === 0) {
-      return res.status(404).json({ error: 'Channel not found' });
+      return c.json({ error: 'Channel not found' });
     }
 
-    res.json({
+    return c.json({
       channelId,
       channelInfo: channelResults.results[0]
     });
   } catch (error) {
     console.error('YouTube channel error:', error);
-    res.status(500).json({ error: `Failed to get channel info: ${error.message}` });
+    return c.json({ error: `Failed to get channel info: ${error.message}` });
   }
 });
 
@@ -166,30 +166,30 @@ router.get('/yt_channel/:channelId', async (req, res) => {
  *       400:
  *         description: Missing/invalid params
  */
-router.get('/yt_playlists', async (req, res) => {
+router.get('/yt_playlists', async (c) => {
   try {
-    const { q: query, continuationToken } = req.query;
+    const { q: query, continuationToken } = c.c.req.query()();
 
     // FIXED: Allow continuation without query
     if (!query && !continuationToken) {
-      return res.status(400).json({ error: "Missing required query parameter 'q' or 'continuationToken'" });
+      return c.json({ error: "Missing required query parameter 'q' or 'continuationToken'" });
     }
 
-    const youtubeSearch = req.app.locals.youtubeSearch;
+    const youtubeSearch = c.get('youtubeSearch');
     const playlistResults = await youtubeSearch.searchPlaylists(
       query || null, 
       continuationToken
     );
 
-    res.json({
+    return c.json({
       query: query || null,
       playlists: playlistResults.results,
       continuationToken: playlistResults.continuationToken
     });
   } catch (error) {
     console.error('YouTube playlists error:', error);
-    res.status(500).json({ error: `Failed to search playlists: ${error.message}` });
+    return c.json({ error: `Failed to search playlists: ${error.message}` });
   }
 });
 
-module.exports = router;
+export default router;
