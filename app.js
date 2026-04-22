@@ -13,6 +13,9 @@ import exploreRoutes from './routes/explore.js';
 import youtubeRoutes from './routes/youtube.js';
 import jiosaavnRoutes from './routes/jiosaavn.js';
 
+// Import addon manifest
+import addonManifest from './addon-manifest.js';
+
 // Import libraries
 import YTMusic from './lib/ytmusicapi.js';
 import YouTubeSearch from './lib/youtube-search.js';
@@ -47,6 +50,11 @@ app.get('/', (c) => {
 // Health check endpoint
 app.get('/health', (c) => {
   return c.json({ status: 'ok' });
+});
+
+// Manifest endpoint
+app.get('/manifest.json', (c) => {
+  return c.json(addonManifest);
 });
 
 // API routes

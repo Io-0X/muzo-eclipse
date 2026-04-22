@@ -10,7 +10,7 @@
   },
   
   "routes": [
-    { "src": "^/(?:api|entities|explore|youtube|jiosaavn|api-docs|health)(?:/.*)?$", "dest": "/app.js" }
+    { "src": "/.*", "dest": "/app.js" }
   ],
   
   "env": {
