@@ -1,5 +1,5 @@
 // Eclipse Music Addon Manifest Configuration
-export default {
+const addonManifest = {
   id: 'com.muzo.eclipse-addon',
   name: 'Muzo Music Addon',
   version: '1.0.0',
@@ -9,3 +9,5 @@ export default {
   types: ['track', 'album', 'artist', 'playlist'],
   contentType: 'music'
 };
+
+export default addonManifest;

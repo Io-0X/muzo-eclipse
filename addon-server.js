@@ -3,8 +3,8 @@
  * Run with: node addon-server.js
  */
 
-const { serve } = require('@hono/node-server');
-const { app, addonManifest } = require('./addon');
+import { serve } from '@hono/node-server';
+import { app, addonManifest } from './addon.js';
 
 const PORT = process.env.ADDON_PORT || 3001;
 
