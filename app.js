@@ -57,12 +57,12 @@ app.get('/manifest.json', (c) => {
   return c.json(addonManifest);
 });
 
-// API routes
-app.route('/api', apiRoutes);
-app.route('/api', entitiesRoutes);
-app.route('/api', exploreRoutes);
-app.route('/api', youtubeRoutes);
-app.route('/api', jiosaavnRoutes);
+// API routes (mounted at root, not /api)
+app.route('/', apiRoutes);
+app.route('/', entitiesRoutes);
+app.route('/', exploreRoutes);
+app.route('/', youtubeRoutes);
+app.route('/', jiosaavnRoutes);
 
 // Error handling middleware
 app.onError((err, c) => {
