@@ -1,10 +1,10 @@
-const express = require('express');
+import { Hono } from 'hono';
 
-const router = express.Router();
-const { getSimilarTracks, LASTFM_API_KEY } = require('../lib/lastfm_api');
-const { getYouTubeSong } = require('../lib/get_youtube_song');
-const youtubeiClient = require('../lib/youtubei-client');
-const axios = require('axios');
+const router = new Hono();
+import { getSimilarTracks, LASTFM_API_KEY } from '../lib/lastfm_api.js';
+import { getYouTubeSong } from '../lib/get_youtube_song.js';
+import youtubeiClient from '../lib/youtubei-client.js';
+import axios from 'axios';
 
 const ALLOWED_FILTERS = new Set([
   'songs',
@@ -432,11 +432,11 @@ async function fetchFromInvidious(videoId) {
  *       404:
  *         description: Song not found
  */
-router.get('/music/find', async (req, res) => {
-  const { name, artist } = req.query;
+router.get('/music/find', async (c) => {
+  const { name, artist } = c.req.query();
 
   if (!name || !artist) {
-    return res.status(400).json({
+    return c.json({
       success: false,
       error: 'Missing required parameters: name and artist are required'
     });
@@ -447,11 +447,11 @@ router.get('/music/find', async (req, res) => {
     console.log(`[FIND] Searching for: ${query}`);
 
     // Use the ytmusic client from app.locals
-    const ytmusic = req.app.locals.ytmusic;
+    const ytmusic = c.get('ytmusic');
     const searchResults = await ytmusic.search(query, 'songs');
 
     if (!searchResults || !searchResults.results || searchResults.results.length === 0) {
-      return res.status(404).json({
+      return c.json({
         success: false,
         error: 'Song not found'
       });
@@ -504,12 +504,12 @@ router.get('/music/find', async (req, res) => {
       // Fetch full song details to get more metadata if needed, 
       // but search result usually has enough for basic metadata.
       // Let's return what we have from search to be fast.
-      return res.json({
+      return c.json({
         success: true,
         data: bestMatch
       });
     } else {
-      return res.status(404).json({
+      return c.json({
         success: false,
         error: 'Song not found after filtering'
       });
@@ -517,7 +517,7 @@ router.get('/music/find', async (req, res) => {
 
   } catch (error) {
     console.error('[FIND] Error:', error);
-    return res.status(500).json({
+    return c.json({
       success: false,
       error: error.message
     });
@@ -544,11 +544,11 @@ router.get('/music/find', async (req, res) => {
  *       404:
  *         description: No streaming data found
  */
-router.get('/stream/:id', async (req, res) => {
-  const { id } = req.params;
+router.get('/stream/:id', async (c) => {
+  const { id } = c.req.param();
 
   if (!id) {
-    return res.status(400).json({
+    return c.json({
       success: false,
       error: 'Missing required parameter: id is required'
     });
@@ -562,18 +562,18 @@ router.get('/stream/:id', async (req, res) => {
 
     if (invidiousResult) {
       console.log('[STREAM] Invidious success, returning raw data.');
-      return res.json(invidiousResult);
+      return c.json(invidiousResult);
     }
 
     // Failed
     console.log('[STREAM] Invidious failed.');
-    res.status(404).json({
+    return c.json({
       success: false,
       error: 'No streaming data found from Invidious'
     });
   } catch (error) {
     console.error('Stream endpoint error:', error);
-    res.status(500).json({
+    return c.json({
       success: false,
       error: 'Internal server error',
       message: error.message
@@ -616,22 +616,22 @@ router.get('/stream/:id', async (req, res) => {
  *       400:
  *         description: Missing/invalid params
  */
-router.get('/search', async (req, res) => {
+router.get('/search', async (c) => {
   try {
-    const { q: query, filter, continuationToken, ignore_spelling = false } = req.query;
+    const { q: query, filter, continuationToken, ignore_spelling = false } = c.req.query();
 
     // FIXED: Don't require query if continuation token is provided
     if (!query && !continuationToken) {
-      return res.status(400).json({ error: "Missing required query parameter 'q' or 'continuationToken'" });
+      return c.json({ error: "Missing required query parameter 'q' or 'continuationToken'" });
     }
 
     if (filter && !ALLOWED_FILTERS.has(filter)) {
-      return res.status(400).json({
+      return c.json({
         error: `Invalid filter. Allowed: ${Array.from(ALLOWED_FILTERS).sort()}`
       });
     }
 
-    const ytmusic = req.app.locals.ytmusic;
+    const ytmusic = c.get('ytmusic');
 
     // FIXED: Pass query only if it's not a continuation request
     const searchResults = await ytmusic.search(
@@ -641,7 +641,7 @@ router.get('/search', async (req, res) => {
       ignore_spelling === 'true'
     );
 
-    res.json({
+    return c.json({
       query: query || null,
       filter,
       results: searchResults.results,
@@ -649,7 +649,7 @@ router.get('/search', async (req, res) => {
     });
   } catch (error) {
     console.error('Search error:', error);
-    res.status(500).json({ error: `Search failed: ${error.message}` });
+    return c.json({ error: `Search failed: ${error.message}` });
   }
 });
 
@@ -676,16 +676,16 @@ router.get('/search', async (req, res) => {
  *       400:
  *         description: Missing/invalid params
  */
-router.get('/search/suggestions', async (req, res) => {
+router.get('/search/suggestions', async (c) => {
   try {
-    const { q: query, music } = req.query;
+    const { q: query, music } = c.req.query();
 
     if (!query) {
-      return res.status(400).json({ error: "Missing required query parameter 'q'" });
+      return c.json({ error: "Missing required query parameter 'q'" });
     }
 
-    const ytmusic = req.app.locals.ytmusic;
-    const youtubeSearch = req.app.locals.youtubeSearch;
+    const ytmusic = c.get('ytmusic');
+    const youtubeSearch = c.get('youtubeSearch');
 
     if (music === '1') {
       // Get suggestions from YouTube Music
@@ -693,17 +693,17 @@ router.get('/search/suggestions', async (req, res) => {
       // Fallback to standard YouTube if empty
       if (!suggestions || suggestions.length === 0) {
         const fallback = await youtubeSearch.getSuggestions(query);
-        return res.json({ suggestions: fallback, source: 'youtube_music_fallback' });
+        return c.json({ suggestions: fallback, source: 'youtube_music_fallback' });
       }
-      return res.json({ suggestions, source: 'youtube_music' });
+      return c.json({ suggestions, source: 'youtube_music' });
     } else {
       // Get suggestions from YouTube
       const suggestions = await youtubeSearch.getSuggestions(query);
-      return res.json({ suggestions, source: 'youtube' });
+      return c.json({ suggestions, source: 'youtube' });
     }
   } catch (error) {
     console.error('Suggestions error:', error);
-    res.status(500).json({ error: `Suggestions failed: ${error.message}` });
+    return c.json({ error: `Suggestions failed: ${error.message}` });
   }
 });
 
@@ -725,18 +725,18 @@ router.get('/search/suggestions', async (req, res) => {
  *       400:
  *         description: Missing query parameter
  */
-router.get('/search/suggestions/debug', async (req, res) => {
+router.get('/search/suggestions/debug', async (c) => {
   try {
-    const { q: query } = req.query;
+    const { q: query } = c.req.query();
 
     if (!query) {
-      return res.status(400).json({ error: "Missing required query parameter 'q'" });
+      return c.json({ error: "Missing required query parameter 'q'" });
     }
 
-    const youtubeSearch = req.app.locals.youtubeSearch;
+    const youtubeSearch = c.get('youtubeSearch');
     const suggestions = await youtubeSearch.getSuggestions(query);
 
-    res.json({
+    return c.json({
       query,
       suggestions,
       count: suggestions.length,
@@ -744,9 +744,9 @@ router.get('/search/suggestions/debug', async (req, res) => {
     });
   } catch (error) {
     console.error('Debug suggestions error:', error);
-    res.status(500).json({
+    return c.json({
       error: `Debug failed: ${error.message}`,
-      query: req.query.q
+      query: c.req.query().q
     });
   }
 });
@@ -797,35 +797,35 @@ router.get('/search/suggestions/debug', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.get('/similar', async (req, res) => {
+router.get('/similar', async (c) => {
   try {
-    const { title, artist, limit } = req.query;
+    const { title, artist, limit } = c.req.query();
     // Use embedded key if env var missing
     const apiKey = process.env.LASTFM_API_KEY || LASTFM_API_KEY;
 
     if (!title || !artist) {
-      return res.status(400).json({ error: 'Missing title or artist parameter' });
+      return c.json({ error: 'Missing title or artist parameter' });
     }
 
     const lastFmData = await getSimilarTracks(String(title), String(artist), apiKey, String(limit || '5'));
 
     if (lastFmData && lastFmData.error) {
-      return res.status(500).json({ error: lastFmData.error });
+      return c.json({ error: lastFmData.error });
     }
 
     const youtubeSearchPromises = lastFmData.map(t => getYouTubeSong(`${t.title} ${t.artist}`));
     const allYoutubeResults = await Promise.all(youtubeSearchPromises);
     const matched = allYoutubeResults.filter(r => r && r.id);
 
-    return res.status(200).json(matched);
+    return c.json(matched);
   } catch (error) {
     console.error('Error in /api/similar:', error);
-    return res.status(500).json({ error: 'Something went wrong' });
+    return c.json({ error: 'Something went wrong' });
   }
 });
 
 // Helper to send consistent JSON response with cache headers
-function sendJson(res, body, cacheControl = 'private') {
+function sendJson(c, body, cacheControl = 'private') {
   console.log(`[SENDJSON] Sending response:`, {
     status: 200,
     cacheControl,
@@ -833,27 +833,21 @@ function sendJson(res, body, cacheControl = 'private') {
     timestamp: new Date().toISOString()
   });
 
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Cache-Control', cacheControl);
-  res.status(200).send(JSON.stringify(body));
+  return c.json(body, 200);
 }
 
-function invalidRequest(res, message = 'Invalid request') {
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Cache-Control', 'private');
-  res.status(400).send(JSON.stringify({
+function invalidRequest(c, message = 'Invalid request') {
+  return c.json({
     error: true,
     message
-  }));
+  }, 400);
 }
 
-function authFailure(res) {
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Cache-Control', 'private');
-  res.status(401).send(JSON.stringify({
+function authFailure(c) {
+  return c.json({
     error: true,
     message: 'Authentication failed'
-  }));
+  }, 401);
 }
 
 /**
@@ -882,9 +876,9 @@ function authFailure(res) {
  *       401:
  *         description: Authentication failed
  */
-router.get('/feed', (req, res) => {
-  const authToken = req.query.authToken;
-  const preview = req.query.preview === '1' || req.query.preview === 1;
+router.get('/feed', (c) => {
+  const authToken = c.req.query().authToken;
+  const preview = c.req.query().preview === '1' || c.req.query().preview === 1;
 
   if (!authToken || String(authToken).trim() === '') {
     return invalidRequest(res, 'session is a required parameter');
@@ -946,9 +940,9 @@ router.get('/feed', (req, res) => {
  *       400:
  *         description: No valid channel IDs provided
  */
-router.get('/feed/unauthenticated', (req, res) => {
-  const channelsParam = req.query.channels;
-  const preview = req.query.preview === '1' || req.query.preview === 1;
+router.get('/feed/unauthenticated', (c) => {
+  const channelsParam = c.req.query().channels;
+  const preview = c.req.query().preview === '1' || c.req.query().preview === 1;
 
   if (!channelsParam || String(channelsParam).trim() === '') {
     return invalidRequest(res, 'No valid channel IDs provided');
@@ -1005,21 +999,21 @@ router.get('/feed/unauthenticated', (req, res) => {
  *       500:
  *         description: Failed to fetch album data
  */
-router.get('/album/:id', async (req, res) => {
-  const albumId = req.params.id;
+router.get('/album/:id', async (c) => {
+  const albumId = c.req.param().id;
 
   console.log(`[ALBUM] Fetching album ${albumId}`);
 
   if (!albumId || String(albumId).trim() === '') {
-    return res.status(400).json({ error: 'Album ID is required' });
+    return c.json({ error: 'Album ID is required' });
   }
 
   try {
     const albumData = await youtubeiClient.getAlbum(albumId);
-    return res.json(albumData);
+    return c.json(albumData);
   } catch (error) {
     console.error(`[ALBUM] Error fetching album ${albumId}:`, error.message);
-    return res.status(500).json({
+    return c.json({
       success: false,
       error: 'Failed to fetch album data',
       message: error.message
@@ -1047,21 +1041,21 @@ router.get('/album/:id', async (req, res) => {
  *       500:
  *         description: Failed to fetch playlist data
  */
-router.get('/playlist/:id', async (req, res) => {
-  const playlistId = req.params.id;
+router.get('/playlist/:id', async (c) => {
+  const playlistId = c.req.param().id;
 
   console.log(`[PLAYLIST] Fetching playlist ${playlistId}`);
 
   if (!playlistId || String(playlistId).trim() === '') {
-    return res.status(400).json({ error: 'Playlist ID is required' });
+    return c.json({ error: 'Playlist ID is required' });
   }
 
   try {
     const playlistData = await youtubeiClient.getPlaylist(playlistId);
-    return res.json(playlistData);
+    return c.json(playlistData);
   } catch (error) {
     console.error(`[PLAYLIST] Error fetching playlist ${playlistId}:`, error.message);
-    return res.status(500).json({
+    return c.json({
       success: false,
       error: 'Failed to fetch playlist data',
       message: error.message
@@ -1093,11 +1087,11 @@ router.get('/playlist/:id', async (req, res) => {
  *       400:
  *         description: No valid channel IDs provided
  */
-router.get('/feed/channels=:channels', (req, res) => {
+router.get('/feed/channels=:channels', (c) => {
   // ... existing code ...
   console.log(`[ROUTE] /feed/channels=:channels route hit!`);
-  const channelsParam = req.params.channels;
-  const preview = req.query.preview === '1' || req.query.preview === 1;
+  const channelsParam = c.req.param().channels;
+  const preview = c.req.query().preview === '1' || c.req.query().preview === 1;
 
   console.log(`[FEED/CHANNELS] Request received:`, {
     channelsParam,
@@ -1199,16 +1193,16 @@ router.get('/feed/channels=:channels', (req, res) => {
  *       500:
  *         description: Failed to fetch trending content
  */
-router.get('/trending', async (req, res) => {
+router.get('/trending', async (c) => {
   try {
     const trending = await youtubeiClient.getTrending();
-    res.json({
+    return c.json({
       success: true,
       data: trending
     });
   } catch (error) {
     console.error('Trending API error:', error);
-    res.status(500).json({
+    return c.json({
       success: false,
       error: 'Failed to fetch trending content'
     });
@@ -1255,29 +1249,29 @@ router.get('/trending', async (req, res) => {
  *                       duration_seconds:
  *                         type: number
  */
-router.get('/related/:id', async (req, res) => {
+router.get('/related/:id', async (c) => {
   try {
-    const videoId = req.params.id;
+    const videoId = c.req.param().id;
 
     if (!videoId || String(videoId).trim() === '') {
-      return res.status(400).json({
+      return c.json({
         success: false,
         error: 'Video ID is required'
       });
     }
 
     const related = await youtubeiClient.getRelated(videoId);
-    res.json({
+    return c.json({
       success: true,
       data: related
     });
   } catch (error) {
     console.error('Related videos API error:', error);
-    res.status(500).json({
+    return c.json({
       success: false,
       error: 'Failed to fetch related videos'
     });
   }
 });
 
-module.exports = router;
+export default router;

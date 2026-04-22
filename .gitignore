@@ -2,69 +2,15 @@
 # Dependencies
 node_modules/
 
-# Logs
+# Logs and temp files
 *.log
+*.tmp
 
-# Environment variables
+# Environment
 .env
 .env.local
 *.env.*
 
-# IDE and editor settings
+# Editors
 .vscode/
-.idea/
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Build and distribution
-dist/
-build/
-target/
-
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-
-# Temporary files
-*.tmp
-*.temp
-*.bak
-*.swp
-*.swo
-
-# Coverage reports
-coverage/
-htmlcov/
-*.coverage
-
-# Compression formats
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
-
 ```

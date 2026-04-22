@@ -1,7 +1,7 @@
-const express = require('express');
-const axios = require('axios');
-const router = express.Router();
-const youtubeiClient = require('../lib/youtubei-client');
+import { Hono } from 'hono';
+import axios from 'axios';
+const router = new Hono();
+import youtubeiClient from '../lib/youtubei-client.js';
 
 /**
  * @swagger
@@ -21,16 +21,16 @@ const youtubeiClient = require('../lib/youtubei-client');
  *       500:
  *         description: Song data unavailable
  */
-router.get('/songs/:videoId', async (req, res) => {
+router.get('/songs/:videoId', async (c) => {
   try {
-    const { videoId } = req.params;
-    const ytmusic = req.app.locals.ytmusic;
+    const { videoId } = c.req.param();
+    const ytmusic = c.get('ytmusic');
 
     const data = await ytmusic.getSong(videoId);
-    res.json(data);
+    return c.json(data);
   } catch (error) {
     console.error('Song error:', error);
-    res.status(500).json({ error: `Song data unavailable: ${error.message}` });
+    return c.json({ error: `Song data unavailable: ${error.message}` });
   }
 });
 
@@ -52,15 +52,15 @@ router.get('/songs/:videoId', async (req, res) => {
  *       500:
  *         description: Album data unavailable
  */
-router.get('/albums/:browseId', async (req, res) => {
+router.get('/albums/:browseId', async (c) => {
   try {
-    const { browseId } = req.params;
+    const { browseId } = c.req.param();
     // Use the new youtubei client
     const data = await youtubeiClient.getAlbum(browseId);
-    res.json(data);
+    return c.json(data);
   } catch (error) {
     console.error('Album error:', error);
-    res.status(500).json({ error: `Album data unavailable: ${error.message}` });
+    return c.json({ error: `Album data unavailable: ${error.message}` });
   }
 });
 
@@ -82,16 +82,16 @@ router.get('/albums/:browseId', async (req, res) => {
  *       500:
  *         description: Artist data unavailable
  */
-router.get('/artists/:browseId', async (req, res) => {
+router.get('/artists/:browseId', async (c) => {
   try {
-    const { browseId } = req.params;
-    const ytmusic = req.app.locals.ytmusic;
+    const { browseId } = c.req.param();
+    const ytmusic = c.get('ytmusic');
 
     const data = await ytmusic.getArtist(browseId);
-    res.json(data);
+    return c.json(data);
   } catch (error) {
     console.error('Artist error:', error);
-    res.status(500).json({ error: `Artist data unavailable: ${error.message}` });
+    return c.json({ error: `Artist data unavailable: ${error.message}` });
   }
 });
 
@@ -119,15 +119,15 @@ router.get('/artists/:browseId', async (req, res) => {
  *       500:
  *         description: Playlist data unavailable
  */
-router.get('/playlists/:playlistId', async (req, res) => {
+router.get('/playlists/:playlistId', async (c) => {
   try {
-    const { playlistId } = req.params;
+    const { playlistId } = c.req.param();
     // Use the new youtubei client
     const data = await youtubeiClient.getPlaylist(playlistId);
-    res.json(data);
+    return c.json(data);
   } catch (error) {
     console.error('Playlist error:', error);
-    res.status(500).json({ error: `Playlist data unavailable: ${error.message}` });
+    return c.json({ error: `Playlist data unavailable: ${error.message}` });
   }
 });
 
@@ -155,10 +155,10 @@ router.get('/playlists/:playlistId', async (req, res) => {
  *       500:
  *         description: Artist data unavailable
  */
-router.get('/artist/:artistId', async (req, res) => {
+router.get('/artist/:artistId', async (c) => {
   try {
-    const { artistId } = req.params;
-    const { country = 'US' } = req.query;
+    const { artistId } = c.req.param();
+    const { country = 'US' } = c.c.req.query()();
 
     const YOUTUBE_MUSIC_API_URL = 'https://summer-darkness-1435.bob17040246.workers.dev/youtubei/v1/browse?prettyPrint=false';
 
@@ -179,7 +179,7 @@ router.get('/artist/:artistId', async (req, res) => {
     });
 
     if (response.status !== 200) {
-      return res.status(500).json({ error: `HTTP error: ${response.status}` });
+      return c.json({ error: `HTTP error: ${response.status}` });
     }
 
     const data = response.data;
@@ -257,7 +257,7 @@ router.get('/artist/:artistId', async (req, res) => {
       }
     }
 
-    res.json({
+    return c.json({
       artistName: artistHeader,
       artistAvatar,
       playlistId,
@@ -266,8 +266,8 @@ router.get('/artist/:artistId', async (req, res) => {
     });
   } catch (error) {
     console.error('Artist summary error:', error);
-    res.status(500).json({ error: `Artist data unavailable: ${error.message}` });
+    return c.json({ error: `Artist data unavailable: ${error.message}` });
   }
 });
 
-module.exports = router;
+export default router;
