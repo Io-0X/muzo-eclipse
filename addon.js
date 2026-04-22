@@ -4,15 +4,15 @@
  * Integrates with existing Muzo backend libraries
  */
 
-const { Hono } = require('hono');
-const { cors } = require('hono/cors');
-const addonManifest = require('./addon-manifest');
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import addonManifest from './addon-manifest.js';
 
 // Import existing Muzo backend libraries
-const YTMusic = require('./lib/ytmusicapi');
-const YouTubeSearch = require('./lib/youtube-search');
-const youtubeiClient = require('./lib/youtubei-client');
-const jiosaavn = require('./lib/jiosaavn');
+import YTMusic from './lib/ytmusicapi.js';
+import YouTubeSearch from './lib/youtube-search.js';
+import youtubeiClient from './lib/youtubei-client.js';
+import jiosaavn from './lib/jiosaavn.js';
 
 // Initialize clients
 const ytmusic = new YTMusic();
@@ -358,4 +358,4 @@ console.log(`🎶 Resources: ${addonManifest.resources.join(', ')}`);
 console.log(`🎤 Types: ${addonManifest.types.join(', ')}`);
 
 // Export for Vercel/serverless deployment and Node.js
-module.exports = { app, addonManifest };
+export { app, addonManifest };
